@@ -1,0 +1,62 @@
+app:
+  name: "MCP Agents Cloud"
+  description: "提供管理MCP服务器和代理的平台"
+  version: "0.1.0"
+
+api:
+  prefix: "/api/v1"
+  docs_url: "/docs"
+  redoc_url: "/redoc"
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+  reload: true
+  workers: 1
+  server_url: "http://localhost:8000"
+
+security:
+  secret_key: "your-secret-key-here-change-in-production"
+  algorithm: "HS256"
+  access_token_expire_minutes: 11520  # 8 days
+
+cors:
+  origins:
+    - "http://localhost"
+    - "http://localhost:8080"
+    - "http://localhost:3000"
+  allow_credentials: true
+  allow_methods: ["*"]
+  allow_headers: ["*"]
+
+database:
+  url: "mysql+pymysql://root:password@localhost:3306/mcp_agents"
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout: 30
+  pool_recycle: 3600
+
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: ""
+  prefix: "mcp_agents:"
+
+openai:
+  api_key: ""
+  model: "gpt-3.5-turbo"
+  temperature: 0.7
+
+email:
+  from_email: "info@example.com"
+  from_name: "MCP Agents Cloud"
+  reset_token_expire_hours: 48
+  templates_dir: "app/email-templates"
+
+smtp:
+  host: ""
+  port: 587
+  tls: true
+  user: ""
+  password: "" 

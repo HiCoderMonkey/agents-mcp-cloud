@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from pydantic import BaseModel
 
@@ -6,18 +6,26 @@ from pydantic import BaseModel
 class AgentBase(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    status: Optional[str] = "inactive"
-    instructions: Optional[str] = None
-    is_active: Optional[bool] = True
+    model: Optional[str] = None
+    temperature: Optional[float] = 0.7
+    max_tokens: Optional[int] = 2048
     mcp_server_id: Optional[int] = None
+    is_active: Optional[bool] = True
 
 
 class AgentCreate(AgentBase):
     name: str
+    user_id: int
 
 
-class AgentUpdate(AgentBase):
-    pass
+class AgentUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    model: Optional[str] = None
+    temperature: Optional[float] = None
+    max_tokens: Optional[int] = None
+    mcp_server_id: Optional[int] = None
+    is_active: Optional[bool] = None
 
 
 class AgentInDBBase(AgentBase):
@@ -27,8 +35,12 @@ class AgentInDBBase(AgentBase):
     user_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class Agent(AgentInDBBase):
+    pass
+
+
+class AgentInDB(AgentInDBBase):
     pass 

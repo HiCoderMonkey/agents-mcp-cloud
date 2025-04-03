@@ -2,6 +2,11 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
 
+import auth from './modules/auth'
+import agents from './modules/agents'
+import sdkKeys from './modules/sdk-keys'
+import dashboard from './modules/dashboard'
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -11,7 +16,9 @@ export default new Vuex.Store({
     user: JSON.parse(localStorage.getItem('user')) || {},
     mcpServers: [],
     agents: [],
-    sdkKeys: []
+    sdkKeys: [],
+    loading: false,
+    error: null
   },
   getters: {
     isLoggedIn: state => !!state.token,
@@ -19,7 +26,9 @@ export default new Vuex.Store({
     currentUser: state => state.user,
     mcpServers: state => state.mcpServers,
     agents: state => state.agents,
-    sdkKeys: state => state.sdkKeys
+    sdkKeys: state => state.sdkKeys,
+    isLoading: state => state.loading,
+    error: state => state.error
   },
   mutations: {
     auth_request(state) {
@@ -46,6 +55,15 @@ export default new Vuex.Store({
     },
     set_sdk_keys(state, sdkKeys) {
       state.sdkKeys = sdkKeys
+    },
+    SET_LOADING(state, isLoading) {
+      state.loading = isLoading
+    },
+    SET_ERROR(state, error) {
+      state.error = error
+    },
+    CLEAR_ERROR(state) {
+      state.error = null
     }
   },
   actions: {
@@ -129,8 +147,21 @@ export default new Vuex.Store({
             reject(error)
           })
       })
+    },
+    setLoading({ commit }, isLoading) {
+      commit('SET_LOADING', isLoading)
+    },
+    setError({ commit }, error) {
+      commit('SET_ERROR', error)
+    },
+    clearError({ commit }) {
+      commit('CLEAR_ERROR')
     }
   },
   modules: {
+    auth,
+    agents,
+    sdkKeys,
+    dashboard
   }
 }) 

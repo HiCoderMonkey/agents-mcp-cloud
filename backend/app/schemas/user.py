@@ -16,8 +16,12 @@ class UserCreate(UserBase):
     password: str
 
 
-class UserUpdate(UserBase):
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
     password: Optional[str] = None
+    is_active: Optional[bool] = None
+    is_admin: Optional[bool] = None
 
 
 class UserInDBBase(UserBase):
@@ -25,7 +29,7 @@ class UserInDBBase(UserBase):
     created_at: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class User(UserInDBBase):

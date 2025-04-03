@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # MySQL数据库服务
+  mysql:
+    image: mysql:8.0
+    container_name: mcp_agents_mysql
+    restart: always
+    network_mode: "bridge"
+    ports:
+      - "63307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: mcp_agents
+      MYSQL_USER: mcp_user
+      MYSQL_PASSWORD: mcp_password
+      TZ: Asia/Shanghai
+    volumes:
+      - /appdata/share/agents-mcp-cloud/mysql/data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d  # 初始化脚本目录
+      - ./mysql/conf:/etc/mysql/conf.d            # 配置文件目录
+    command: --default-authentication-plugin=mysql_native_password
+             --character-set-server=utf8mb4
+             --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 10

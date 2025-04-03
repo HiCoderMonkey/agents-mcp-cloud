@@ -1,0 +1,58 @@
+app:
+  name: "MCP Agents Cloud"
+  description: "提供管理MCP服务器和代理的平台"
+  version: "0.1.0"
+
+api:
+  prefix: "/api/v1"
+  docs_url: null  # 生产环境禁用API文档
+  redoc_url: null
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+  reload: false
+  workers: 4
+  server_url: "https://api.mcpagents.com"
+
+security:
+  # 生产环境密钥 - 请替换为强随机值
+  secret_key: "REPLACE_WITH_STRONG_SECRET_KEY_IN_PRODUCTION"
+  algorithm: "HS256"
+  access_token_expire_minutes: 11520  # 8 days
+
+cors:
+  origins:
+    - "https://mcpagents.com"
+    - "https://www.mcpagents.com"
+  allow_credentials: true
+  allow_methods: ["*"]
+  allow_headers: ["*"]
+
+database:
+  # 生产环境数据库
+  url: "mysql+pymysql://mcp_user:mcp_password@localhost:63307/mcp_agents_prod"
+  pool_size: 10
+  max_overflow: 20
+  pool_timeout: 30
+  pool_recycle: 3600
+
+openai:
+  # 生产环境OpenAI配置
+  api_key: ""  # 请填入实际的API密钥
+  model: "gpt-3.5-turbo"
+  temperature: 0.7
+
+email:
+  from_email: "info@mcpagents.com"
+  from_name: "MCP Agents Cloud"
+  reset_token_expire_hours: 48
+  templates_dir: "app/email-templates"
+
+smtp:
+  # 生产环境邮件服务器
+  host: "smtp.mcpagents.com"
+  port: 587
+  tls: true
+  user: "noreply@mcpagents.com"
+  password: "REPLACE_WITH_ACTUAL_SMTP_PASSWORD" 

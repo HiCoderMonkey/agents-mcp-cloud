@@ -16,10 +16,17 @@ class MCPServerCreate(MCPServerBase):
     name: str
     address: str
     port: int
+    api_key: str
+    user_id: int
 
 
-class MCPServerUpdate(MCPServerBase):
-    pass
+class MCPServerUpdate(BaseModel):
+    name: Optional[str] = None
+    address: Optional[str] = None
+    port: Optional[int] = None
+    api_key: Optional[str] = None
+    is_active: Optional[bool] = None
+    status: Optional[str] = None
 
 
 class MCPServerInDBBase(MCPServerBase):
@@ -29,8 +36,12 @@ class MCPServerInDBBase(MCPServerBase):
     user_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class MCPServer(MCPServerInDBBase):
+    pass
+
+
+class MCPServerInDB(MCPServerInDBBase):
     pass 

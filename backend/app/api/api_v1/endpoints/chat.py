@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 # 使用OpenAI官方Agents SDK
 from openai.types.responses import ResponseTextDeltaEvent
-from agents import Agent, Runner, AgentState, ItemHelpers
+from agents import Agent, Runner
 
 from app import crud, models, schemas
 from app.api import deps

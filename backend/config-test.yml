@@ -1,0 +1,58 @@
+app:
+  name: "MCP Agents Cloud - 测试环境"
+  description: "提供管理MCP服务器和代理的平台"
+  version: "0.1.0"
+
+api:
+  prefix: "/api/v1"
+  docs_url: "/docs"
+  redoc_url: "/redoc"
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+  reload: false
+  workers: 2
+  server_url: "http://test-api.example.com"
+
+security:
+  # 测试环境密钥
+  secret_key: "test-secret-key-change-in-production"
+  algorithm: "HS256"
+  access_token_expire_minutes: 11520  # 8 days
+
+cors:
+  origins:
+    - "http://test.example.com"
+    - "https://test.example.com"
+  allow_credentials: true
+  allow_methods: ["*"]
+  allow_headers: ["*"]
+
+database:
+  # 测试环境数据库
+  url: "mysql+pymysql://mcp_user:mcp_password@localhost:63307/mcp_agents_test"
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout: 30
+  pool_recycle: 3600
+
+openai:
+  # 测试环境OpenAI配置
+  api_key: ""
+  model: "gpt-3.5-turbo"
+  temperature: 0.7
+
+email:
+  from_email: "test-info@example.com"
+  from_name: "MCP Agents Cloud - 测试"
+  reset_token_expire_hours: 48
+  templates_dir: "app/email-templates"
+
+smtp:
+  # 测试环境邮件配置
+  host: "smtp.test.example.com"
+  port: 587
+  tls: true
+  user: "test@example.com"
+  password: "test-password" 
