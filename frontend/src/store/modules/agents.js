@@ -10,6 +10,7 @@ import {
   deleteAgentSDKKey,
   updateAgentSDKKeyStatus
 } from '@/api/agents'
+import request from '@/utils/request'
 
 const state = {
   agents: [],
@@ -77,11 +78,12 @@ const actions = {
     commit('SET_LOADING', true)
     try {
       const response = await getAgents(params)
+      const agents = response.data
       commit('SET_AGENTS', {
-        agents: response.data.items,
-        total: response.data.total
+        agents: Array.isArray(agents) ? agents : [],
+        total: Array.isArray(agents) ? agents.length : 0
       })
-      return response.data
+      return agents
     } catch (error) {
       console.error('获取代理列表失败:', error)
       return Promise.reject(error)
@@ -223,6 +225,26 @@ const actions = {
     } finally {
       commit('SET_LOADING', false)
     }
+  },
+
+  // 发送消息到Agent
+  async sendMessage(_, { agentId, message }) {
+    const response = await request({
+      url: `/agents/${agentId}/send`,
+      method: 'post',
+      data: { message }
+    })
+    return response.data
+  },
+
+  // 获取与Agent的聊天历史
+  async getChatHistory(_, { agentId, skip = 0, limit = 20 }) {
+    const response = await request({
+      url: `/agents/${agentId}/history`,
+      method: 'get',
+      params: { skip, limit }
+    })
+    return response.data
   }
 }
 

@@ -1,11 +1,13 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
+import { login } from '@/api/auth'
 
 import auth from './modules/auth'
 import agents from './modules/agents'
 import sdkKeys from './modules/sdk-keys'
 import dashboard from './modules/dashboard'
+import mcpServers from './modules/mcp-servers'
 
 Vue.use(Vuex)
 
@@ -64,31 +66,36 @@ export default new Vuex.Store({
     },
     CLEAR_ERROR(state) {
       state.error = null
+    },
+    SET_TOKEN(state, token) {
+      state.token = token
+    },
+    SET_USER(state, user) {
+      state.user = user
     }
   },
   actions: {
-    login({ commit }, user) {
-      return new Promise((resolve, reject) => {
-        commit('auth_request')
-        axios.post('/auth/login', user)
-          .then(resp => {
-            const token = resp.data.access_token
-            const user = resp.data.user
-            // 存储token到localStorage
-            localStorage.setItem('token', token)
-            localStorage.setItem('user', JSON.stringify(user))
-            // 设置axios默认Authorization头
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-            commit('auth_success', { token, user })
-            resolve(resp)
-          })
-          .catch(err => {
-            commit('auth_error')
-            localStorage.removeItem('token')
-            localStorage.removeItem('user')
-            reject(err)
-          })
-      })
+    async login({ commit, dispatch }, userInfo) {
+      commit('SET_LOADING', true)
+      try {
+        const response = await login(userInfo)
+        const { access_token, user } = response.data
+        
+        // 保存到状态和本地存储
+        commit('SET_TOKEN', access_token)
+        commit('SET_USER', user)
+        localStorage.setItem('token', access_token)
+        localStorage.setItem('user', JSON.stringify(user))
+        
+        // 获取用户信息
+        await dispatch('getUserInfo')
+        
+        return Promise.resolve(response)
+      } catch (error) {
+        return Promise.reject(error)
+      } finally {
+        commit('SET_LOADING', false)
+      }
     },
     register({ commit }, user) {
       return new Promise((resolve, reject) => {
@@ -156,12 +163,16 @@ export default new Vuex.Store({
     },
     clearError({ commit }) {
       commit('CLEAR_ERROR')
+    },
+    getUserInfo({ commit }) {
+      // Implementation of getUserInfo action
     }
   },
   modules: {
     auth,
     agents,
     sdkKeys,
-    dashboard
+    dashboard,
+    mcpServers
   }
 }) 

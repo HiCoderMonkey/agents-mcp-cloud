@@ -19,12 +19,14 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self.model = model
 
     def get(self, db: Session, id: Any) -> Optional[ModelType]:
-        return db.query(self.model).filter(self.model.id == id).first()
+        obj = db.query(self.model).filter(self.model.id == id).first()
+        return self._convert_id_to_str(obj) if obj else None
 
     def get_multi(
         self, db: Session, *, skip: int = 0, limit: int = 100
     ) -> List[ModelType]:
-        return db.query(self.model).offset(skip).limit(limit).all()
+        objs = db.query(self.model).offset(skip).limit(limit).all()
+        return self._convert_list_ids_to_str(objs)
 
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
@@ -32,7 +34,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
-        return db_obj
+        return self._convert_id_to_str(db_obj)
 
     def update(
         self,
@@ -52,10 +54,20 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
-        return db_obj
+        return self._convert_id_to_str(db_obj)
 
     def remove(self, db: Session, *, id: int) -> ModelType:
         obj = db.query(self.model).get(id)
         db.delete(obj)
         db.commit()
-        return obj 
+        return self._convert_id_to_str(obj)
+
+    def _convert_id_to_str(self, obj: Any) -> Any:
+        """将对象的 ID 转换为字符串"""
+        if hasattr(obj, 'id'):
+            obj.id = str(obj.id)
+        return obj
+
+    def _convert_list_ids_to_str(self, objs: List[Any]) -> List[Any]:
+        """将列表中所有对象的 ID 转换为字符串"""
+        return [self._convert_id_to_str(obj) for obj in objs] 

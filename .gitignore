@@ -53,3 +53,5 @@ Thumbs.db
 # Log files
 logs/
 *.log
+/mcp-workspace/servers/
+**/.venv/

@@ -3,7 +3,7 @@ import request from './config'
 // 用户登录
 export function login(data) {
   return request({
-    url: '/auth/login',
+    url: '/auth/json-login',
     method: 'post',
     data: {
       username: data.username,

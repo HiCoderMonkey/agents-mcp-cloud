@@ -1,6 +1,13 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import store from '../store'
+import Home from '../views/Home.vue'
+import Login from '../views/Login.vue'
+import Agents from '../views/Agents.vue'
+import AgentDetail from '../views/AgentDetail.vue'
+import SDKKeys from '../views/SDKKeys.vue'
+import MCPServers from '../views/MCPServers.vue'
+import MCPServerDetail from '../views/MCPServerDetail.vue'
+import MCPServerForm from '../views/MCPServerForm.vue'
 
 Vue.use(VueRouter)
 
@@ -8,13 +15,13 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('../views/Home.vue'),
+    component: Home,
     meta: { requiresAuth: true }
   },
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../views/Login.vue'),
+    component: Login,
     meta: { guest: true }
   },
   {
@@ -26,25 +33,43 @@ const routes = [
   {
     path: '/mcp-servers',
     name: 'MCPServers',
-    component: () => import('../views/MCPServers.vue'),
+    component: MCPServers,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/mcp-servers/create',
+    name: 'CreateMCPServer',
+    component: MCPServerForm,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/mcp-servers/:id',
+    name: 'MCPServerDetail',
+    component: MCPServerDetail,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/mcp-servers/:id/edit',
+    name: 'EditMCPServer',
+    component: MCPServerForm,
     meta: { requiresAuth: true }
   },
   {
     path: '/agents',
     name: 'Agents',
-    component: () => import('../views/Agents.vue'),
+    component: Agents,
     meta: { requiresAuth: true }
   },
   {
     path: '/agents/:id',
     name: 'AgentDetail',
-    component: () => import('../views/AgentDetail.vue'),
+    component: AgentDetail,
     meta: { requiresAuth: true }
   },
   {
     path: '/sdk-keys',
     name: 'SDKKeys',
-    component: () => import('../views/SDKKeys.vue'),
+    component: SDKKeys,
     meta: { requiresAuth: true }
   },
   {
@@ -72,27 +97,21 @@ const router = new VueRouter({
 
 // 路由守卫
 router.beforeEach((to, from, next) => {
+  const loggedIn = localStorage.getItem('token')
+  
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    // 需要登录的页面
-    if (!store.getters.isLoggedIn) {
-      // 未登录，重定向到登录页
-      next({
-        path: '/login',
-        query: { redirect: to.fullPath }
-      })
+    if (!loggedIn) {
+      next('/login')
     } else {
       next()
     }
   } else if (to.matched.some(record => record.meta.guest)) {
-    // 游客页面
-    if (store.getters.isLoggedIn) {
-      // 已登录，重定向到首页
-      next({ path: '/' })
+    if (loggedIn) {
+      next('/')
     } else {
       next()
     }
   } else {
-    // 公共页面
     next()
   }
 })

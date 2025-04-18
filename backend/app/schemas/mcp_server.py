@@ -1,42 +1,31 @@
-from typing import Optional
+from typing import Optional, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
+
+from .base import BaseSchema
 
 
-class MCPServerBase(BaseModel):
-    name: Optional[str] = None
-    address: Optional[str] = None
-    port: Optional[int] = None
-    api_key: Optional[str] = None
-    is_active: Optional[bool] = True
-    status: Optional[str] = "offline"
+class MCPServerBase(BaseSchema):
+    name: str
+    description: Optional[str] = None
+    config: Dict[str, Any]
 
 
 class MCPServerCreate(MCPServerBase):
-    name: str
-    address: str
-    port: int
-    api_key: str
-    user_id: int
+    pass
 
 
-class MCPServerUpdate(BaseModel):
+class MCPServerUpdate(BaseSchema):
     name: Optional[str] = None
-    address: Optional[str] = None
-    port: Optional[int] = None
-    api_key: Optional[str] = None
-    is_active: Optional[bool] = None
-    status: Optional[str] = None
+    description: Optional[str] = None
+    config: Optional[Dict[str, Any]] = None
 
 
 class MCPServerInDBBase(MCPServerBase):
-    id: int
+    id: str
     created_at: datetime
     updated_at: Optional[datetime] = None
-    user_id: int
-
-    class Config:
-        from_attributes = True
+    user_id: str
 
 
 class MCPServer(MCPServerInDBBase):

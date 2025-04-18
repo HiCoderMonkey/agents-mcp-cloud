@@ -1,6 +1,6 @@
 import request from './config'
 
-// 获取所有代理
+// 获取代理列表
 export function getAgents(params) {
   return request({
     url: '/agents',
@@ -9,15 +9,7 @@ export function getAgents(params) {
   })
 }
 
-// 获取单个代理详情
-export function getAgentById(id) {
-  return request({
-    url: `/agents/${id}`,
-    method: 'get'
-  })
-}
-
-// 创建新代理
+// 创建代理
 export function createAgent(data) {
   return request({
     url: '/agents',
@@ -26,7 +18,7 @@ export function createAgent(data) {
   })
 }
 
-// 更新代理信息
+// 更新代理
 export function updateAgent(id, data) {
   return request({
     url: `/agents/${id}`,
@@ -40,6 +32,14 @@ export function deleteAgent(id) {
   return request({
     url: `/agents/${id}`,
     method: 'delete'
+  })
+}
+
+// 获取代理详情
+export function getAgentById(id) {
+  return request({
+    url: `/agents/${id}`,
+    method: 'get'
   })
 }
 

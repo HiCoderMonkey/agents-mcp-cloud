@@ -30,8 +30,8 @@ instance.interceptors.response.use(
     return response
   },
   error => {
-    if (error.response && error.response.status === 401) {
-      // token过期，清除用户信息并跳转到登录页
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      // token过期或无权限，清除用户信息并跳转到登录页
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       if (window.location.pathname !== '/login') {

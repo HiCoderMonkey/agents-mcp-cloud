@@ -1,4 +1,4 @@
-from app.schemas.token import Token, TokenPayload
+from app.schemas.token import Token, TokenPayload, LoginJson
 from app.schemas.user import User, UserCreate, UserUpdate, UserInDB
 from app.schemas.mcp_server import MCPServer, MCPServerCreate, MCPServerUpdate
 from app.schemas.agent import Agent, AgentCreate, AgentUpdate

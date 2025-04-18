@@ -41,6 +41,30 @@ def login_access_token(
     }
 
 
+@router.post("/json-login", response_model=schemas.Token)
+def login_json(
+    db: Session = Depends(deps.get_db), login_data: schemas.LoginJson = Body(...)
+) -> Any:
+    """
+    JSON格式的登录API，接受用户名和密码字段
+    """
+    user = crud.user.authenticate(
+        db, email=login_data.username, password=login_data.password
+    )
+    if not user:
+        raise HTTPException(status_code=400, detail="用户名或密码错误")
+    elif not user.is_active:
+        raise HTTPException(status_code=400, detail="用户未激活")
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return {
+        "access_token": security.create_access_token(
+            user.id, expires_delta=access_token_expires
+        ),
+        "token_type": "bearer",
+        "user": user
+    }
+
+
 @router.post("/password-recovery/{email}", response_model=schemas.Msg)
 def recover_password(email: str, db: Session = Depends(deps.get_db)) -> Any:
     """

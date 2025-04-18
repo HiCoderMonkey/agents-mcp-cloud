@@ -1,33 +1,36 @@
 from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+
+from .base import BaseSchema
 
 
-class SDKKeyBase(BaseModel):
+class SDKKeyBase(BaseSchema):
     name: Optional[str] = None
-    is_active: Optional[bool] = True
-    agent_id: int
+    is_active: bool = True
+    agent_id: str
 
 
 class SDKKeyCreate(SDKKeyBase):
     pass
 
 
-class SDKKeyUpdate(BaseModel):
+class SDKKeyUpdate(BaseSchema):
     name: Optional[str] = None
     is_active: Optional[bool] = None
-    expires_at: Optional[datetime] = None
 
 
 class SDKKeyInDBBase(SDKKeyBase):
-    id: int
+    id: str
     key: str
     created_at: datetime
     expires_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
+    user_id: str
 
 
 class SDKKey(SDKKeyInDBBase):
+    pass
+
+
+class SDKKeyInDB(SDKKeyInDBBase):
     pass 

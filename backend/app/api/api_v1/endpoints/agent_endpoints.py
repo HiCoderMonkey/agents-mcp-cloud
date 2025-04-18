@@ -11,53 +11,52 @@ router = APIRouter()
 
 @router.get("/", response_model=List[schemas.Agent])
 def read_agents(
-    db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
-    current_user: models.User = Depends(deps.get_current_active_user),
+        db: Session = Depends(deps.get_db),
+        skip: int = 0,
+        limit: int = 100,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     获取Agent列表
     """
-    if current_user.is_admin:
-        agents = crud.agent.get_multi(db, skip=skip, limit=limit)
-    else:
-        agents = crud.agent.get_multi_by_user(
-            db=db, user_id=current_user.id, skip=skip, limit=limit
-        )
+    agents = crud.agent.get_multi(db, skip=skip, limit=limit)
     return agents
 
 
 @router.post("/", response_model=schemas.Agent)
 def create_agent(
-    *,
-    db: Session = Depends(deps.get_db),
-    agent_in: schemas.AgentCreate,
-    current_user: models.User = Depends(deps.get_current_active_user),
+        *,
+        db: Session = Depends(deps.get_db),
+        agent_in: schemas.AgentCreate,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     创建新的Agent
     """
-    # 检查MCP服务器是否存在
-    if agent_in.mcp_server_id:
-        mcp_server = crud.mcp_server.get(db=db, id=agent_in.mcp_server_id)
-        if not mcp_server:
-            raise HTTPException(status_code=404, detail="MCP服务器不存在")
-        if not current_user.is_admin and mcp_server.user_id != current_user.id:
-            raise HTTPException(status_code=400, detail="没有操作该MCP服务器的权限")
-    
-    agent = crud.agent.create_with_user(
-        db=db, obj_in=agent_in, user_id=current_user.id
-    )
+    # 检查MCP服务器是否存在且有权限访问
+    if agent_in.mcp_server_ids:
+        is_valid, missing_ids = crud.mcp_server.validate_servers_exist_and_accessible(
+            db=db,
+            server_ids=agent_in.mcp_server_ids
+        )
+
+        if not is_valid:
+            if missing_ids:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"以下MCP服务器不存在: {', '.join(missing_ids)}"
+                )
+
+    agent = crud.agent.create_with_user(db=db, obj_in=agent_in, user_id=current_user.id)
     return agent
 
 
 @router.get("/{agent_id}", response_model=schemas.Agent)
 def read_agent(
-    *,
-    db: Session = Depends(deps.get_db),
-    agent_id: int,
-    current_user: models.User = Depends(deps.get_current_active_user),
+        *,
+        db: Session = Depends(deps.get_db),
+        agent_id: int,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     通过ID获取Agent
@@ -72,11 +71,11 @@ def read_agent(
 
 @router.put("/{agent_id}", response_model=schemas.Agent)
 def update_agent(
-    *,
-    db: Session = Depends(deps.get_db),
-    agent_id: int,
-    agent_in: schemas.AgentUpdate,
-    current_user: models.User = Depends(deps.get_current_active_user),
+        *,
+        db: Session = Depends(deps.get_db),
+        agent_id: int,
+        agent_in: schemas.AgentUpdate,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     更新Agent
@@ -86,7 +85,7 @@ def update_agent(
         raise HTTPException(status_code=404, detail="Agent不存在")
     if not current_user.is_admin and (agent.user_id != current_user.id):
         raise HTTPException(status_code=400, detail="没有足够的权限")
-    
+
     # 检查MCP服务器是否存在
     if agent_in.mcp_server_id:
         mcp_server = crud.mcp_server.get(db=db, id=agent_in.mcp_server_id)
@@ -94,7 +93,7 @@ def update_agent(
             raise HTTPException(status_code=404, detail="MCP服务器不存在")
         if not current_user.is_admin and mcp_server.user_id != current_user.id:
             raise HTTPException(status_code=400, detail="没有操作该MCP服务器的权限")
-    
+
     agent = crud.agent.update(
         db=db, db_obj=agent, obj_in=agent_in
     )
@@ -103,10 +102,10 @@ def update_agent(
 
 @router.delete("/{agent_id}", response_model=schemas.Agent)
 def delete_agent(
-    *,
-    db: Session = Depends(deps.get_db),
-    agent_id: int,
-    current_user: models.User = Depends(deps.get_current_active_user),
+        *,
+        db: Session = Depends(deps.get_db),
+        agent_id: int,
+        current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     删除Agent
@@ -117,4 +116,4 @@ def delete_agent(
     if not current_user.is_admin and (agent.user_id != current_user.id):
         raise HTTPException(status_code=400, detail="没有足够的权限")
     agent = crud.agent.remove(db=db, id=agent_id)
-    return agent 
+    return agent

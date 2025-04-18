@@ -19,12 +19,7 @@ def read_mcp_servers(
     """
     获取MCP服务器列表
     """
-    if current_user.is_admin:
-        mcp_servers = crud.mcp_server.get_multi(db, skip=skip, limit=limit)
-    else:
-        mcp_servers = crud.mcp_server.get_multi_by_user(
-            db=db, user_id=current_user.id, skip=skip, limit=limit
-        )
+    mcp_servers = crud.mcp_server.get_multi(db, skip=skip, limit=limit)
     return mcp_servers
 
 

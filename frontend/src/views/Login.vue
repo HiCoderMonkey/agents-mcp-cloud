@@ -48,14 +48,16 @@ export default {
   methods: {
     submitForm() {
       this.$refs.loginForm.validate(valid => {
+        debugger
         if (valid) {
           this.loading = true
           // 构建表单数据，适配后端API格式
-          const formData = new FormData()
-          formData.append('username', this.loginForm.email)
-          formData.append('password', this.loginForm.password)
+          const userData = {
+            username: this.loginForm.email,
+            password: this.loginForm.password
+          };
           
-          this.$store.dispatch('login', formData)
+          this.$store.dispatch('login', userData)
             .then(() => {
               this.$message.success('登录成功')
               // 如果有重定向参数，则跳转到该路径

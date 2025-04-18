@@ -154,7 +154,7 @@ export CONFIG_FILE="/完整路径/到配置文件/config-dev.yml"
 启动后端服务器后，可以在以下地址访问API文档：
 
 ```
-http://localhost:8000/api/v1/docs
+http://localhost:8000/docs
 ```
 
 ## 项目结构

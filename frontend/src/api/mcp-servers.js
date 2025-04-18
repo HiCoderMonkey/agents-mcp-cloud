@@ -1,6 +1,6 @@
 import request from './config'
 
-// 获取所有MCP服务器
+// 获取MCP服务器列表
 export function getMCPServers(params) {
   return request({
     url: '/mcp-servers',
@@ -17,7 +17,7 @@ export function getMCPServerById(id) {
   })
 }
 
-// 创建新MCP服务器
+// 创建MCP服务器
 export function createMCPServer(data) {
   return request({
     url: '/mcp-servers',
@@ -26,7 +26,7 @@ export function createMCPServer(data) {
   })
 }
 
-// 更新MCP服务器信息
+// 更新MCP服务器
 export function updateMCPServer(id, data) {
   return request({
     url: `/mcp-servers/${id}`,

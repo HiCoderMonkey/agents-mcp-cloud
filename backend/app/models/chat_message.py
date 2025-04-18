@@ -11,10 +11,5 @@ class ChatMessage(BaseModel):
     role = Column(String(20), nullable=False)  # user, assistant
     content = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
-    # 外键关系
-    agent_id = Column(BigInteger, ForeignKey("agents.id"))
-    agent = relationship("Agent", back_populates="chat_messages")
-    
-    user_id = Column(BigInteger, ForeignKey("users.id"))
-    user = relationship("User") 
+    agent_id = Column(BigInteger, nullable=False)
+    user_id = Column(BigInteger, nullable=False)

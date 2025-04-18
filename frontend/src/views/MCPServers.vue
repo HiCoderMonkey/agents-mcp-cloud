@@ -1,56 +1,63 @@
 <template>
   <div class="mcp-servers-container">
     <div class="page-header">
-      <h2>MCP服务器管理</h2>
-      <el-button type="primary" @click="dialogVisible = true">添加服务器</el-button>
+      <h2>MCP服务管理</h2>
+      <el-button type="primary" @click="goToCreate">添加MCP服务</el-button>
     </div>
 
-    <!-- 服务器列表 -->
     <el-table
       v-loading="loading"
       :data="servers"
       border
       style="width: 100%">
       <el-table-column
+        prop="id"
+        label="ID"
+        width="80">
+      </el-table-column>
+      <el-table-column
         prop="name"
         label="名称"
-        width="180">
+        min-width="150">
       </el-table-column>
       <el-table-column
-        prop="address"
-        label="地址"
-        width="180">
+        prop="description"
+        label="描述"
+        min-width="200"
+        show-overflow-tooltip>
       </el-table-column>
       <el-table-column
-        prop="port"
-        label="端口">
-      </el-table-column>
-      <el-table-column
-        prop="status"
-        label="状态">
+        label="配置内容"
+        min-width="180">
         <template slot-scope="scope">
-          <el-tag :type="scope.row.status === 'online' ? 'success' : (scope.row.status === 'offline' ? 'danger' : 'warning')">
-            {{ statusText(scope.row.status) }}
-          </el-tag>
+          <el-popover
+            placement="top"
+            width="400"
+            trigger="hover">
+            <pre>{{ formatJSON(scope.row.config) }}</pre>
+            <el-button slot="reference" size="mini" type="text">查看配置</el-button>
+          </el-popover>
         </template>
       </el-table-column>
       <el-table-column
-        prop="is_active"
-        label="激活状态">
+        prop="created_at"
+        label="创建时间"
+        width="180">
         <template slot-scope="scope">
-          <el-switch
-            v-model="scope.row.is_active"
-            @change="updateServerStatus(scope.row)">
-          </el-switch>
+          {{ formatDate(scope.row.created_at) }}
         </template>
       </el-table-column>
       <el-table-column
         label="操作"
-        width="200">
+        width="180">
         <template slot-scope="scope">
           <el-button
             size="mini"
-            @click="handleEdit(scope.row)">编辑</el-button>
+            @click="goToDetail(scope.row)">查看</el-button>
+          <el-button
+            size="mini"
+            type="primary"
+            @click="goToEdit(scope.row)">编辑</el-button>
           <el-button
             size="mini"
             type="danger"
@@ -59,156 +66,99 @@
       </el-table-column>
     </el-table>
 
-    <!-- 添加/编辑服务器对话框 -->
-    <el-dialog :title="isEdit ? '编辑服务器' : '添加服务器'" :visible.sync="dialogVisible">
-      <el-form :model="serverForm" :rules="rules" ref="serverForm" label-width="100px">
-        <el-form-item label="名称" prop="name">
-          <el-input v-model="serverForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="地址" prop="address">
-          <el-input v-model="serverForm.address"></el-input>
-        </el-form-item>
-        <el-form-item label="端口" prop="port">
-          <el-input v-model.number="serverForm.port" type="number"></el-input>
-        </el-form-item>
-        <el-form-item label="API密钥" prop="api_key">
-          <el-input v-model="serverForm.api_key"></el-input>
-        </el-form-item>
-        <el-form-item label="激活状态" prop="is_active">
-          <el-switch v-model="serverForm.is_active"></el-switch>
-        </el-form-item>
-      </el-form>
-      <div slot="footer">
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveServer" :loading="saveLoading">保存</el-button>
-      </div>
-    </el-dialog>
+    <el-pagination
+      v-if="totalServers > 0"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[10, 20, 50, 100]"
+      :page-size="pageSize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="totalServers"
+      class="pagination">
+    </el-pagination>
   </div>
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
   name: 'MCPServers',
   data() {
     return {
-      loading: false,
-      saveLoading: false,
-      dialogVisible: false,
-      isEdit: false,
-      servers: [],
-      serverForm: this.getEmptyServerForm(),
-      rules: {
-        name: [
-          { required: true, message: '请输入服务器名称', trigger: 'blur' }
-        ],
-        address: [
-          { required: true, message: '请输入服务器地址', trigger: 'blur' }
-        ],
-        port: [
-          { required: true, message: '请输入端口号', trigger: 'blur' },
-          { type: 'number', message: '端口必须为数字', trigger: 'blur' }
-        ],
-        api_key: [
-          { required: true, message: '请输入API密钥', trigger: 'blur' }
-        ]
-      }
+      currentPage: 1,
+      pageSize: 10
     }
+  },
+  computed: {
+    ...mapGetters({
+      servers: 'mcpServers/serverList',
+      loading: 'mcpServers/loading',
+      totalServers: 'mcpServers/totalServers'
+    })
   },
   created() {
     this.fetchServers()
+    console.log('Component created, servers state:', this.$store.state.mcpServers.servers)
   },
   methods: {
-    getEmptyServerForm() {
-      return {
-        name: '',
-        address: '',
-        port: 8080,
-        api_key: '',
-        is_active: true
-      }
-    },
-    statusText(status) {
-      const statusMap = {
-        'online': '在线',
-        'offline': '离线',
-        'error': '错误'
-      }
-      return statusMap[status] || status
-    },
+    ...mapActions({
+      fetchMCPServerList: 'mcpServers/fetchMCPServerList',
+      deleteMCPServer: 'mcpServers/deleteMCPServer'
+    }),
     async fetchServers() {
-      this.loading = true
       try {
-        // 这里应该调用API获取服务器列表
-        // const response = await this.$store.dispatch('fetchServers')
-        // this.servers = response.data
-
-        // 模拟数据
-        this.servers = [
-          { id: 1, name: '测试服务器1', address: '192.168.1.100', port: 8080, api_key: '******', status: 'online', is_active: true },
-          { id: 2, name: '测试服务器2', address: '192.168.1.101', port: 8080, api_key: '******', status: 'offline', is_active: false }
-        ]
+        await this.fetchMCPServerList({
+          page: this.currentPage,
+          size: this.pageSize
+        })
+        console.log('Servers after fetch:', this.servers)
+        console.log('Total servers:', this.totalServers)
       } catch (error) {
-        this.$message.error('获取服务器列表失败')
+        this.$message.error('获取MCP服务列表失败')
         console.error(error)
-      } finally {
-        this.loading = false
       }
     },
-    handleEdit(row) {
-      this.isEdit = true
-      this.serverForm = { ...row }
-      this.dialogVisible = true
+    handleSizeChange(size) {
+      this.pageSize = size
+      this.fetchServers()
+    },
+    handleCurrentChange(page) {
+      this.currentPage = page
+      this.fetchServers()
+    },
+    goToCreate() {
+      this.$router.push('/mcp-servers/create')
+    },
+    goToDetail(row) {
+      this.$router.push(`/mcp-servers/${row.id}`)
+    },
+    goToEdit(row) {
+      this.$router.push(`/mcp-servers/${row.id}/edit`)
     },
     async handleDelete(row) {
-      this.$confirm('确认删除该服务器?', '提示', {
+      this.$confirm('确定要删除该MCP服务吗？删除后将无法恢复。', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async () => {
         try {
-          // 调用API删除服务器
-          // await this.$store.dispatch('deleteServer', row.id)
+          await this.deleteMCPServer(row.id)
           this.$message.success('删除成功')
-          this.fetchServers()
         } catch (error) {
           this.$message.error('删除失败')
+          console.error(error)
         }
       }).catch(() => {})
     },
-    async saveServer() {
-      this.$refs.serverForm.validate(async (valid) => {
-        if (valid) {
-          this.saveLoading = true
-          try {
-            if (this.isEdit) {
-              // 更新服务器
-              // await this.$store.dispatch('updateServer', this.serverForm)
-              this.$message.success('更新成功')
-            } else {
-              // 创建服务器
-              // await this.$store.dispatch('createServer', this.serverForm)
-              this.$message.success('创建成功')
-            }
-            this.dialogVisible = false
-            this.fetchServers()
-          } catch (error) {
-            this.$message.error(this.isEdit ? '更新失败' : '创建失败')
-          } finally {
-            this.saveLoading = false
-          }
-        }
-      })
+    formatDate(dateStr) {
+      if (!dateStr) return ''
+      const date = new Date(dateStr)
+      return date.toLocaleString()
     },
-    async updateServerStatus(row) {
-      try {
-        // 更新服务器状态
-        // await this.$store.dispatch('updateServerStatus', { id: row.id, is_active: row.is_active })
-        this.$message.success('状态更新成功')
-      } catch (error) {
-        this.$message.error('状态更新失败')
-        // 回滚UI状态
-        row.is_active = !row.is_active
-      }
+    formatJSON(json) {
+      return JSON.stringify(json, null, 2)
     }
   }
 }
@@ -228,5 +178,17 @@ export default {
 
 h2 {
   margin: 0;
+}
+
+.pagination {
+  margin-top: 20px;
+  text-align: right;
+}
+
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 300px;
+  overflow: auto;
 }
 </style> 

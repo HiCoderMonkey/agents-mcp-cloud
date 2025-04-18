@@ -27,6 +27,7 @@ const actions = {
   async login({ commit }, userInfo) {
     commit('SET_LOADING', true)
     try {
+      debugger
       const response = await login(userInfo)
       const { access_token, user } = response.data
       
@@ -35,6 +36,9 @@ const actions = {
       commit('SET_USER', user)
       localStorage.setItem('token', access_token)
       localStorage.setItem('user', JSON.stringify(user))
+      
+      console.log('User from localStorage:', localStorage.getItem('user'))
+      console.log('Parsed user:', JSON.parse(localStorage.getItem('user') || '{}'))
       
       return Promise.resolve(response)
     } catch (error) {
@@ -63,8 +67,11 @@ const actions = {
     commit('SET_LOADING', true)
     try {
       const response = await getUserInfo()
+      debugger
       commit('SET_USER', response.data)
       localStorage.setItem('user', JSON.stringify(response.data))
+      console.log('User from localStorage:', localStorage.getItem('user'))
+      console.log('Parsed user:', JSON.parse(localStorage.getItem('user') || '{}'))
       return response.data
     } catch (error) {
       console.error('获取用户信息失败:', error)
