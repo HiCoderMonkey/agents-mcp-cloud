@@ -115,6 +115,6 @@ async def get_alerts(location: str, lang: str) -> str:
 
 if __name__ == "__main__":
     # Initialize and run the server
-    mcp.run(transport='stdio')
-    # result = asyncio.run(get_alerts("昆明", "zh_CN"))
-    # print(result)
+    # mcp.run(transport='stdio')
+    result = asyncio.run(get_alerts("昆明", "zh_CN"))
+    print(result)
