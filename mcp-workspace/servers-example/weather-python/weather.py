@@ -113,11 +113,8 @@ async def get_alerts(location: str, lang: str) -> str:
     (确保只报告指定单日的天气情况，除非未来会出现异常天气；或者用户明确要求想要了解多日天气，如果未指定，默认报告今天的天气。参数为0的值不需要报告给用户，每次都报告体感温度，根据语境选择合适的参数内容告知用户，并对参数给出相应评价)
     """
 
-async def test_main():
-    result = await get_alerts("昆明", "zh_CN")
-    print(result)
-
 if __name__ == "__main__":
     # Initialize and run the server
-    # mcp.run(transport='stdio')
-    asyncio.run(test_main())
+    mcp.run(transport='stdio')
+    # result = asyncio.run(get_alerts("昆明", "zh_CN"))
+    # print(result)
