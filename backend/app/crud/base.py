@@ -66,6 +66,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """将对象的 ID 转换为字符串"""
         if hasattr(obj, 'id'):
             obj.id = str(obj.id)
+        if hasattr(obj, 'user_id'):
+            obj.user_id = str(obj.user_id)
         return obj
 
     def _convert_list_ids_to_str(self, objs: List[Any]) -> List[Any]:

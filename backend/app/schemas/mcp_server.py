@@ -25,7 +25,7 @@ class MCPServerInDBBase(MCPServerBase):
     id: str
     created_at: datetime
     updated_at: Optional[datetime] = None
-    user_id: str
+    user_id: Optional[str] = None
 
 
 class MCPServer(MCPServerInDBBase):

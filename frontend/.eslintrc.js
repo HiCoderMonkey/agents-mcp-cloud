@@ -7,11 +7,19 @@ module.exports = {
     'plugin:vue/essential',
     'eslint:recommended'
   ],
+  parser: '@babel/eslint-parser',
   parserOptions: {
-    parser: '@babel/eslint-parser',
     requireConfigFile: false,
     babelOptions: {
-      plugins: ['@babel/plugin-proposal-optional-chaining']
+      babelrc: false,
+      configFile: false,
+      presets: ["@babel/preset-env"],
+      plugins: ["@babel/plugin-syntax-jsx"]
+    },
+    ecmaVersion: 2020,
+    sourceType: 'module',
+    ecmaFeatures: {
+      jsx: true
     }
   },
   rules: {
